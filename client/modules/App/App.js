@@ -2,16 +2,16 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-// Import Style
-import styles from './App.css';
-
 // Import Components
-import Helmet from 'react-helmet';
 import Header from './components/Header/Header';
+import BrandDashboard from './Components/BrandDashboard/BrandDashboard';
+import InfluencerDashboard from './Components/InfluencerDashboard/InfluencerDashboard';
 
-// Import Actions
-import { toggleAddPost } from './AppActions';
-import { switchLanguage } from '../../modules/Intl/IntlActions';
+// Import Selectors
+import { getUser } from './AppReducer';
+
+// Import Action
+import { fetchUser } from './AppActions';
 
 let DevTools;
 if (process.env.NODE_ENV === 'development') {
@@ -27,56 +27,49 @@ export class App extends Component {
 
   componentDidMount() {
     this.setState({isMounted: true}); // eslint-disable-line
+    if (!this.props.user.mode) {
+      this.props.dispatch(fetchUser());
+    }
   }
 
-  toggleAddPostSection = () => {
-    this.props.dispatch(toggleAddPost());
-  };
-
   render() {
+    console.log("re render");
+    let pages = "Loading";
+    
+      if (this.props.user.mode == 0) {
+        pages = <InfluencerDashboard user={this.props.user} children={this.props.children}/>
+      } else {
+        pages = <BrandDashboard user={this.props.user} children={this.props.children}/>
+      }
+    
+    
     return (
       <div>
-        {this.state.isMounted && !window.devToolsExtension && process.env.NODE_ENV === 'development' && <DevTools />}
-        <div>
-          <Helmet
-            title="MERN Starter - Blog App"
-            titleTemplate="%s - Blog App"
-            meta={[
-              { charset: 'utf-8' },
-              {
-                'http-equiv': 'X-UA-Compatible',
-                content: 'IE=edge',
-              },
-              {
-                name: 'viewport',
-                content: 'width=device-width, initial-scale=1',
-              },
-            ]}
-          />
-          <Header
-            switchLanguage={lang => this.props.dispatch(switchLanguage(lang))}
-            intl={this.props.intl}
-            toggleAddPost={this.toggleAddPostSection}
-          />
-          <div className={styles.container}>
-            {this.props.children}
-          </div>
+        {/* {this.state.isMounted && !window.devToolsExtension && process.env.NODE_ENV === 'development' && <DevTools />} */}
+        <Header
+          location={this.props.location}
+        />
+        <div className="container">
+          {pages}
         </div>
       </div>
     );
   }
 }
 
+// Actions required to provide data for this component to render in sever side.
+App.need = [() => { return fetchUser(); }];
+
 App.propTypes = {
   children: PropTypes.object.isRequired,
   dispatch: PropTypes.func.isRequired,
-  intl: PropTypes.object.isRequired,
 };
 
 // Retrieve data from store as props
 function mapStateToProps(store) {
   return {
     intl: store.intl,
+    user: getUser(store),
   };
 }
 

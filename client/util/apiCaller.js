@@ -13,50 +13,38 @@ import { browserHistory } from 'react-router';
 //   process.env.BASE_URL || (`${ENV.apiUrl}${ENV.apiVersion}`) :
 //   '/api';
 
-export const API_URL = `${ENV.apiUrl}${ENV.apiVersion}`;
+export const API_URL = ENV.apiUrl;
 
 export default function callApi(endpoint, method = 'get', body) {
-  function redirectLogin() {
-    browserHistory.push('/auth/register');
-  }
-  let returnApi = false;
-
-  function fetchApi(url) {
-    return fetch(url, {
-      headers: { 'content-type': 'application/json' },
-      method,
-      body: JSON.stringify(body),
-    })
-    .then(response => response.json().then(json => ({ json, response })))
-    .then(({ json, response }) => {
-      if (!response.ok) {
-        return Promise.reject(json);
-      }
-
-      // only for login we need to get header information
-      if (endpoint === 'login' && json.id) {
-        setStorage('authorization', response.headers.get('Authorization'));
-        browserHistory.push('/');
-      }
-
-      return json;
-    })
-    .then(
-      response => response,
-      error => error
-    );
+  const authorization = getStorage('token');
+  
+  let fetchData = {
+    headers: { 'content-type': 'application/json' },
+    method,
+    body: JSON.stringify(body),
   }
 
-  if (getStorage('authorization')) {
-    returnApi = fetchApi(`${API_URL}/${endpoint}`);
+  if (authorization) {
+    fetchData.headers.Authorization = `Bearer ${authorization}`;
   }
-  if (!getStorage('authorization')) {
-    if (endpoint === 'login') {
-      returnApi = fetchApi(`${ENV.apiUrl}/${endpoint}`);
-    } else {
-      redirectLogin();
-      returnApi = false;
+
+  return fetch(`${API_URL}${endpoint}`, fetchData)
+  .then(response => response.json().then(json => ({ json, response })))
+  .then(({ json, response }) => {
+    if (!response.ok) {
+      return Promise.reject(json);
     }
-  }
-  return returnApi;
+
+    // only for login we need to get header information
+    if (endpoint === 'login' && json.id) {
+      json.authorization = response.headers.get('Authorization');
+    }
+
+    return json;
+  })
+  .then(
+    response => response,
+    error => error
+  );
+
 }

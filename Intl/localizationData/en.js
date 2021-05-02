@@ -35,6 +35,12 @@ export default {
     submit: "Submit",
     emailNotFound: "Email not found",
     passwordNotMatch: "Password not match",
+    frontDesk: "Front Desk",
+    inventory: "Inventory",
+    alreadyTaken: "has already been taken",
+    instructionHow: "First you need to copy the link below to your Instagram post. After posted copy link of your instagram post you just posted.",
+    createEcommerce: "Create your own e-commerce cart in 3 mins.",
+    makeMoney: "Make money recommending what you"
   },
   
 };

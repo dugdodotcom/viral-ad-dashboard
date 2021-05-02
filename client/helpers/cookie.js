@@ -2,12 +2,12 @@ import cookies from 'react-cookies';
 import { ENV } from '../../config/LocalEnvironment';
 
 const expires = new Date();
-expires.setDate(expires.getDate() + 7);
+expires.setDate(expires.getDate() + 60);
 
 const option = {
   path: '/',
   expires,
-  maxAge: 1000,
+  
   domain: ENV.domain,
 };
 
@@ -22,9 +22,11 @@ export const clearStorage = (name) => {
 };
 
 export const setStorage = (name, value, settings = option) => {
+  console.log(settings, "setting");
   cookies.save(name, value, settings);
 };
 
 export const getStorage = (name) => {
+  console.log("get token", name);
   return cookies.load(name);
 };
