@@ -15,3 +15,9 @@ Then run server:
 ```
 npm start
 ```
+
+
+Server the rails server:
+```
+https://github.com/dugdodotcom/viral-ads-api
+```
